@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+ 
+    tools {
+        maven "M3"
+    }
+   
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('jenkins-aws-secret-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws-secret-access-key')
+        AWS_DEFAULT_REGION = 'us-west-2'
+        sha="$GIT_COMMIT";
+        name="bbk-jenkins-test"
+    }
+ 
+    stages {
+        stage('Build') {
+            steps {
+                git url: 'https://github.com/aws-samples/amazon-codeguru-reviewer-sample-app'
+                // Run Maven on a Unix agent.
+                sh 'mvn package'
+                sh 'git log -n 1 --pretty=format:%H > commit_hash'
+                stash 'Stash Files'
+            }
+ 
+            post {
+                success {
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+        stage('AWS Codeguru Reviewer') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli:latest'
+                    args '--entrypoint='
+                }
+            }
+            steps {
+                sh 'yum install -y jq zip git'
+                sshagent(['private-repo-ssh-key']) {
+                    sh 'mkdir -p ~/.ssh'
+                    sh 'chmod 700 ~/.ssh'
+                    sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+                    sh 'chmod 644 ~/.ssh/known_hosts'
+                   
+                    sh 'rm -rf codeguru-reviewer'
+                    sh 'git clone git@github.com:aws-actions/codeguru-reviewer.git'   
+                }
+                unstash 'Stash Files'
+                sh 'codeguru-reviewer/entrypoint.sh'
+            }
+           
+            post {
+                success {
+                    archiveArtifacts 'codeguru-results*.json'
+                }
+            }
+        }
+    }
+}
