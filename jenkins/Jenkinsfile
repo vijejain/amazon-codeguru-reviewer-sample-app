@@ -63,7 +63,7 @@ pipeline {
         }
         stage('Cleanup') {
             steps {
-                sh 'chown -R jenkins:jenkins /var/jenkins_home/jobs/CodeGuru-Pipeline/workspace@2/codeguru-reviewer/'
+                sh 'sudo chown -R jenkins:jenkins /var/jenkins_home/jobs/CodeGuru-Pipeline/workspace@2/codeguru-reviewer/'
             }
         }
     }
