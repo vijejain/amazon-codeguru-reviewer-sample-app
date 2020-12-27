@@ -36,12 +36,13 @@ pipeline {
             agent {
                 docker { 
                     image 'amazon/aws-cli:latest'
-                    args '-u 1000:1000 --entrypoint='
+                    args '-u jenkins:jenkins --entrypoint='
                 }
             }
             steps {
-                deleteDir()
+                sh 'echo "Executing commands on docker..."'
                 sh 'id; pwd'
+                deleteDir()
                 sh 'yum install -y jq zip git'
                 sshagent(['private-repo-ssh-key']) {
                     sh 'mkdir -p ~/.ssh'
