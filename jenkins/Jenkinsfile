@@ -44,7 +44,7 @@ pipeline {
                 sh 'id; pwd'
                 sh 'chown -R 1000 /var/lib'
                 sh 'yum install -y jq zip git'
-                sshagent(['private-repo-ssh-key']) {
+                sshagent(credentials: ['private-repo-ssh-key']) {
                     sh 'mkdir -p ~/.ssh'
                     sh 'chmod 700 ~/.ssh' 
                     sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
