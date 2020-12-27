@@ -43,7 +43,7 @@ pipeline {
                 deleteDir()
                 sh 'id'
                 sh 'ls -lrt'
-                sh 'sh “chown -R 1000 ."'
+                sh 'sh "chown -R 1000 ."'
                 sh 'yum install -y jq zip git'
                 sshagent(['private-repo-ssh-key']) {
                     sh 'mkdir -p ~/.ssh'
