@@ -20,6 +20,7 @@ pipeline {
         stage('Build') {
             steps {
                 deleteDir()
+                sh 'aws s3 ls'
                 git branch: 'master', url: 'https://github.com/nvaidya1/amazon-codeguru-reviewer-sample-app.git'           
                 sh 'mvn -B clean package --file pom.xml'
                 sh 'git log -n 1 --pretty=format:%H > commit_hash'
