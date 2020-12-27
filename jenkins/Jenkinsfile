@@ -53,7 +53,7 @@ pipeline {
                 }
                 unstash 'Stash Files'
                 sh '(export sha=$(cat commit_hash); codeguru-reviewer/entrypoint.sh)'
-                sh 'chown -R jenkins:jenkins /var/jenkins_home/jobs/CodeGuru-Pipeline/workspace@2/codeguru-reviewer/
+                sh 'chown -R jenkins:jenkins /var/jenkins_home/jobs/CodeGuru-Pipeline/workspace@2/codeguru-reviewer/'
             }
             
             post {
