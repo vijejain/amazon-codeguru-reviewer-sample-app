@@ -36,7 +36,7 @@ pipeline {
             agent {
                 docker { 
                     image 'amazon/aws-cli:latest'
-                    args '-u 0:0 --entrypoint='
+                    args '--entrypoint='
                 }
             }
             steps {
@@ -49,7 +49,6 @@ pipeline {
                     sh 'chmod 700 ~/.ssh' 
                     sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
                     sh 'chmod 644 ~/.ssh/known_hosts'
-
                     sh 'git clone git@github.com:aws-actions/codeguru-reviewer.git'    
                 }
                 unstash 'Stash Files'
