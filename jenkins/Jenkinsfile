@@ -42,7 +42,8 @@ pipeline {
             }
             steps {
                 deleteDir()
-                sh 'sudo yum install -y jq zip git'
+                sh 'sudo su'
+                sh 'yum install -y jq zip git'
                 sshagent(['private-repo-ssh-key']) {
                     sh 'mkdir -p ~/.ssh'
                     sh 'chmod 700 ~/.ssh' 
