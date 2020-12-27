@@ -41,7 +41,8 @@ pipeline {
             }
             steps {
                 deleteDir()
-                sh 'id'
+                sh 'id; pwd'
+                sh 'chown -R 1000 /var/lib'
                 sh 'yum install -y jq zip git'
                 sshagent(['private-repo-ssh-key']) {
                     sh 'mkdir -p ~/.ssh'
