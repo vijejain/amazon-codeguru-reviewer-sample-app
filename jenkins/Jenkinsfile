@@ -1,28 +1,31 @@
 pipeline {
     agent any
- 
+    
+    options {
+        ansiColor('xterm')
+    }    
+
     tools {
         maven "M3"
     }
-   
+    
     environment {
         AWS_ACCESS_KEY_ID     = credentials('jenkins-aws-secret-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws-secret-access-key')
         AWS_DEFAULT_REGION = 'us-west-2'
-        sha="$GIT_COMMIT";
-        name="bbk-jenkins-test"
+        name="${env.JOB_NAME.replaceAll("\\s","-")}"
     }
- 
+
     stages {
         stage('Build') {
             steps {
-                git url: 'https://github.com/aws-samples/amazon-codeguru-reviewer-sample-app'
-                // Run Maven on a Unix agent.
-                sh 'mvn package'
+                deleteDir()
+                git branch: 'master', url: 'https://github.com/nvaidya1/amazon-codeguru-reviewer-sample-app.git'           
+                sh 'mvn -B clean package --file pom.xml'
                 sh 'git log -n 1 --pretty=format:%H > commit_hash'
                 stash 'Stash Files'
             }
- 
+
             post {
                 success {
                     archiveArtifacts 'target/*.jar'
@@ -31,29 +34,29 @@ pipeline {
         }
         stage('AWS Codeguru Reviewer') {
             agent {
-                docker {
+                docker { 
                     image 'amazon/aws-cli:latest'
                     args '--entrypoint='
                 }
             }
             steps {
+                deleteDir()
                 sh 'yum install -y jq zip git'
                 sshagent(['private-repo-ssh-key']) {
                     sh 'mkdir -p ~/.ssh'
-                    sh 'chmod 700 ~/.ssh'
+                    sh 'chmod 700 ~/.ssh' 
                     sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
                     sh 'chmod 644 ~/.ssh/known_hosts'
-                   
-                    sh 'rm -rf codeguru-reviewer'
-                    sh 'git clone git@github.com:aws-actions/codeguru-reviewer.git'   
+
+                    sh 'git clone git@github.com:aws-actions/codeguru-reviewer.git'    
                 }
                 unstash 'Stash Files'
-                sh 'codeguru-reviewer/entrypoint.sh'
+                sh '(export sha=$(cat commit_hash); codeguru-reviewer/entrypoint.sh)'
             }
-           
+            
             post {
                 success {
-                    archiveArtifacts 'codeguru-results*.json'
+                    recordIssues(tool: issues(name: 'AWS Codeguru Reviewer', pattern: 'codeguru-results.jenkins-json.log'))
                 }
             }
         }
