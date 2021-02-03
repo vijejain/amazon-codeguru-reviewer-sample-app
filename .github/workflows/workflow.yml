@@ -22,7 +22,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
-    # Extra step requied for private beta
+    # Extra step requied for private beta .. 
     - name: Checkout the action from a private repository
       uses: actions/checkout@v2
       with:
