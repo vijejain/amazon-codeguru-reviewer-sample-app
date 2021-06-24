@@ -33,7 +33,7 @@ jobs:
     - name: AWS CodeGuru Reviewer Security Scanner
       uses: aws-actions/codeguru-reviewer@v1.1
       with:
-        build-root: target # build artifact(s) directory
+        build_path: target # build artifact(s) directory
         s3_bucket: codeguru-reviewer-xxz-data
 
     - name: Upload review result
